@@ -1,6 +1,6 @@
 using StructIO
 using Compat
-using Base.Test
+using Compat.Test
 
 # First, exercise the `@io` macro a bit, to ensure it can handle different
 # kinds of type declarations
