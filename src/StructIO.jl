@@ -171,12 +171,12 @@ function unsafe_unpack(io, ::Type{T}, target, endianness, ::Type{Default}) where
         else
             # Otherwise, for large primitive objects, fall back to our
             # `bswap!()` method which will swap in-place
-            void_ptr = Base.unsafe_convert(Ptr{Void}, target)
+            void_ptr = Base.unsafe_convert(Ptr{Cvoid}, target)
             bswap!(Base.unsafe_convert(Ptr{UInt8}, void_ptr), sz)
         end
     else
         # If we need to bswap, but it's not a primitive type, recurse!
-        target_ptr = Base.unsafe_convert(Ptr{Void}, target)
+        target_ptr = Base.unsafe_convert(Ptr{Cvoid}, target)
         for i = 1:@compat fieldcount(T)
             # Unpack this field into `target` at the appropriate offset
             fT = fieldtype(T, i)
@@ -220,7 +220,7 @@ function unsafe_pack(io, source::Ref{T}, endianness, ::Type{Default}) where {T}
         else
             # If we must bswap something of unknown size, copy first so as
             # to not clobber `source`, then bswap, then write
-            void_ptr = Base.unsafe_convert(Ptr{Void}, Ref{T}(copy(source[])))
+            void_ptr = Base.unsafe_convert(Ptr{Cvoid}, Ref{T}(copy(source[])))
             ptr = Base.unsafe_convert(Ptr{UInt8}, void_ptr)
             bswap!(ptr, sz)
             unsafe_write(io, ptr, sz)
@@ -244,7 +244,7 @@ function unsafe_unpack(io, T, target, endianness, ::Type{Packed})
     end
 
     # Otherwise, iterate over the fields, unpacking each into `target`
-    target_ptr = Base.unsafe_convert(Ptr{Void}, target)
+    target_ptr = Base.unsafe_convert(Ptr{Cvoid}, target)
     for i = 1:@compat fieldcount(T)
         # Unpack this field into `target` at the appropriate offset
         fT = fieldtype(T, i)
