@@ -9,7 +9,7 @@ using Base.Test
     y::UInt
 end
 
-@compat abstract type AbstractType end
+abstract type AbstractType end
 @io struct ConcreteType <: AbstractType
     A::UInt32
     B::UInt16
