@@ -1,5 +1,4 @@
 using StructIO
-using Compat
 using Test
 
 # First, exercise the `@io` macro a bit, to ensure it can handle different
