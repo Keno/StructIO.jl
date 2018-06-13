@@ -3,7 +3,6 @@ module StructIO
 
 using Base: @pure
 using Base.Meta
-using Compat
 export @io, unpack, pack, fix_endian, packed_sizeof
 
 """
