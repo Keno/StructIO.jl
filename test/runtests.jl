@@ -160,7 +160,7 @@ end
     @test packed_sizeof(PackedNestedType) == 2*packed_sizeof(ConcreteType)
     @test packed_sizeof(PackedParametricType{UInt8}) == 2
     @test packed_sizeof(PackedParametricType{UInt32}) == 8
-    const psCT = packed_sizeof(ConcreteType)
+    psCT = packed_sizeof(ConcreteType)
     @test packed_sizeof(PackedParametricType{ConcreteType}) == 2*psCT
 end
 

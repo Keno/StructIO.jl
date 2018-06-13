@@ -71,7 +71,7 @@ end
 end
 
 @pure function packed_sizeof(T::DataType, ::Type{Packed})
-    @assert fieldcount(T) != 0 && isbits(T)
+    @assert fieldcount(T) != 0 && isbitstype(T)
     return sum(packed_sizeof, T.types)
 end
 
@@ -89,7 +89,7 @@ end
 Return the size (in bytes) of a field within `T` in memory
 """
 @pure function fieldsize(T::DataType, field_idx)
-    @assert fieldcount(T) != 0 && isbits(T)
+    @assert fieldcount(T) != 0 && isbitstype(T)
     @assert field_idx <= fieldcount(T)
 
     # We figure out the (padded) size of the given field by looking at the
@@ -206,7 +206,7 @@ function unsafe_pack(io, source::Ref{T}, endianness, ::Type{Default}) where {T}
         unsafe_write(io, source, sz)
     elseif fieldcount(T) == 0
         # Hopefully, LLVM turns this into a jump list for us
-        if sz == 1
+        @GC.preserve source if sz == 1
             write(io, source[])
         elseif sz == 2
             ptr = Base.unsafe_convert(Ptr{T}, source)
@@ -220,10 +220,13 @@ function unsafe_pack(io, source::Ref{T}, endianness, ::Type{Default}) where {T}
         else
             # If we must bswap something of unknown size, copy first so as
             # to not clobber `source`, then bswap, then write
-            void_ptr = Base.unsafe_convert(Ptr{Cvoid}, Ref{T}(copy(source[])))
-            ptr = Base.unsafe_convert(Ptr{UInt8}, void_ptr)
-            bswap!(ptr, sz)
-            unsafe_write(io, ptr, sz)
+            source_copy = Ref{T}(copy(source[]))
+            @GC.preserve source_copy begin
+                void_ptr = Base.unsafe_convert(Ptr{Cvoid}, source_copy)
+                ptr = Base.unsafe_convert(Ptr{UInt8}, void_ptr)
+                bswap!(ptr, sz)
+                unsafe_write(io, ptr, sz)
+            end
         end
     else
         # If we need to bswap, but it's not a primitive type, recurse!
